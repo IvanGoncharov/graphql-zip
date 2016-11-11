@@ -1,0 +1,17 @@
+{
+  "name": "graphql-zip",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "bytebuffer": "^5.0.1",
+    "graphql": "^0.7.2",
+    "lodash": "^4.16.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "./test.sh"
+  },
+  "author": "",
+  "license": "MIT"
+}
