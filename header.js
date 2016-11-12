@@ -21,16 +21,19 @@ var definitions = _.groupBy(query.definitions, 'name.value');
 var operation = GraphQL.getOperationAST(query);
 
 module.exports = function () {
-  var header = new ByteBuffer(0);
+  var header = new ByteBuffer();
   walk(operation, typeInfo, header);
   //console.log(header.toString());
   //console.log(header.toDebug(true));
+  // FIXME:
+  header.limit = header.offset;
+  header.offset = 0;
   return header;
 };
 
 if (require.main === module) {
   var header = module.exports();
-  process.stdout.write(header.toBinary(0, header.offset), 'binary');
+  process.stdout.write(header.toBinary(), 'binary');
   //FS.writeFileSync('/dev/stdout', header.toBinary(0, header.offset), 'binary');
 }
 
@@ -90,10 +93,11 @@ function walk(node, typeInfo, header) {
         header.writeUTF8String(values);
       }
 
-      //TODO: mark end of object
       //TODO: mark begin/end of 'on' spread
-      //Spread reference
       //TODO: check fragment type is type same
+      //TODO: handle skip & include directives
+      //TODO[optimisation]: Spread reference
+      //TODO[optimisation]: make __typename Enum
     },
     SelectionSet: {
       leave(field) {
