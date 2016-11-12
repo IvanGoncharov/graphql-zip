@@ -19,8 +19,13 @@ var HeaderTypeObject = 0x06 << HeaderTypeShift;
 var header = getHeader();
 var data = JSON.parse(FS.readFileSync('introspection_responce.json', 'utf-8')).data;
 var body = new ByteBuffer();
-console.log(header.toDebug(true));
+//console.log(header.toDebug(true));
 packObject(data);
+//console.log(body.toString());
+//console.log(body.toDebug(true));
+body.limit = body.offset;
+body.offset = 0;
+process.stdout.write(body.toBinary(), 'binary');
 
 function getName() {
   var str = null;
@@ -31,7 +36,6 @@ function getName() {
   }
 
   --header.offset;
-  console.log(str);
   return str;
 }
 
@@ -79,14 +83,12 @@ function packObject(obj) {
   _.each(obj, (value, key) => {
     while(getName() !== key) {
       //shouldn't happend on test data
-      console.log('Skip !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+      throw Error('Skip !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
       skipRestOfField(unpackTypeByte());
     }
 
     var type = unpackTypeByte();
     packValue(type, value);
-    console.log('========================================');
-    console.log(body.toDebug(true));
   });
 }
 
@@ -106,7 +108,7 @@ function packValue(type, value) {
     }
 
     var saveOffset = header.offset;
-    _.each(value, arrayValue => {
+    _.each(value, (arrayValue) => {
       header.offset = saveOffset;
       packValue(type, arrayValue);
     });
@@ -133,9 +135,7 @@ function packValue(type, value) {
     case HeaderTypeObject:
       body.writeByte(0x00);
       packObject(value);
-      console.log('Read last');
-      console.log(header.readByte().toString(16)); //should be '}'
+      header.readByte(); //should be '}'
       break;
   }
 }
-//console.log(data);
